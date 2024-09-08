@@ -18,32 +18,39 @@ RUN \
     echo "**** Install Supervisord Exporeter ****" \
     && \
     echo "**** Update apt database ****" \
-      && apt-get update \
-      && apt-get install --no-install-recommends -y \
-         git \
-         curl \
-	 jq \
-	 ca-certificates \
+        && apt-get update \
+        && apt-get install --no-install-recommends -y \
+           git \
+           curl \
+	   jq \
+           ca-certificates \
     && \
     echo "**** Fetch precompiled binary ****" \
-      && ARCHITECTURE="$(dpkg --print-architecture)" \
-      && SE_BINARY_NAME="supervisord-exporter" \
-      && SE_API_URL="https://api.github.com/repos/salimd/supervisord_exporter" \
-      && SE_BINARY_RELEASE_TARGET="/opt/supervisord-exporter" \
-      && SE_BINARY_RELEASE_URL="$( \
-           curl -fsSL "${SE_API_URL}/releases" | \
-             jq -r \
-             --arg ARCHITECTURE "${ARCHITECTURE}" \
-             '.[0] \
-	     | .assets[] \
-             | select( \
-               	 .name | contains($ARCHITECTURE) \
-             	 ) \ 
-             | .browser_download_url' \
-         )" \
-      && curl -fsSL "${SE_BINARY_RELEASE_URL}" \ 
-	   --output "/usr/bin/${SE_BINARY_NAME}" \ 
-      && chmod +x "/usr/bin/${SE_BINARY_NAME}" 
+        && ARCHITECTURE="$(dpkg --print-architecture)" \
+        && SE_BINARY_NAME="supervisord-exporter" \
+        && SE_API_URL="https://api.github.com/repos/salimd/supervisord_exporter" \
+        && SE_BINARY_RELEASE_URL="$( \
+             curl -fsSL "${SE_API_URL}/releases" | \
+              jq -r \
+               --arg ARCHITECTURE "${ARCHITECTURE}" \
+               '.[0] \
+	       | .assets[] \
+               | select( \
+                 .name | contains($ARCHITECTURE) \
+               ) \ 
+               | .browser_download_url' \
+          )" \
+        && curl -fsSL "${SE_BINARY_RELEASE_URL}" \ 
+           --output "/usr/bin/${SE_BINARY_NAME}" \ 
+        && chmod +x "/usr/bin/${SE_BINARY_NAME}" \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/*
 
 # -----------------------------------------------
 # Arguments 

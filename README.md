@@ -11,12 +11,14 @@ Self Explanatory docker-compose example.
 ```yaml
 version: "3"
 services:
+
   supervisord:
     image: supervisord:latest
     ports:
       - "9001:9001"
     volumes:
       - ./supervisord.conf:/etc/supervisord.conf
+
   supervisord_exporter:
     image: yourdockerimage/supervisord-exporter:latest
     ports:

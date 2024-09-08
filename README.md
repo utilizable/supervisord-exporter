@@ -20,7 +20,7 @@ services:
       - ./supervisord.conf:/etc/supervisord.conf
 
   supervisord_exporter:
-    image: yourdockerimage/supervisord-exporter:latest
+    image: ghcr.io/utilizable/supervisord-exporter:latest
     ports:
       - "8080:8080"
     environment:

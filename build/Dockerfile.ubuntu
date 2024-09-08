@@ -1,0 +1,75 @@
+############################################################
+# Copyright (c) 2024 Utilizable 
+# Released under the MIT license
+# ----------------------------------------------------------
+# STRUCTURE:
+#
+# ├─utilizable/mgr-base
+#   ├─utilizable/mgr-supervisord-exporter
+#
+############################################################
+
+FROM ghcr.io/utilizable/mgr-base:0.3.0
+
+# -----------------------------------------------
+# Core Installation
+
+RUN \
+    echo "**** Install Supervisord Exporeter ****" \
+		&& \
+    echo "**** Update apt database ****" \
+      && apt-get update \
+      && apt-get install --no-install-recommends -y \
+         git \
+         curl \
+				 jq \
+				 ca-certificates \
+    && \
+    echo "**** Fetch precompiled binary ****" \
+      && ARCHITECTURE="$(dpkg --print-architecture)" \
+		  && SE_BINARY_NAME="supervisord-exporter" \
+      && SE_API_URL="https://api.github.com/repos/salimd/supervisord_exporter" \
+      && SE_BINARY_RELEASE_TARGET="/opt/supervisord-exporter" \
+      && SE_BINARY_RELEASE_URL="$( \
+           curl -fsSL "${SE_API_URL}/releases" | \
+             jq -r \
+             --arg ARCHITECTURE "${ARCHITECTURE}" \
+             '.[0] \
+						 | .assets[] \
+             | select( \
+               	 .name | contains($ARCHITECTURE) \
+             	 ) \ 
+             | .browser_download_url' \
+         )" \
+      && curl -fsSL "${SE_BINARY_RELEASE_URL}" \ 
+				 	--output "/usr/bin/${SE_BINARY_NAME}" \ 
+			&& chmod +x "/usr/bin/${SE_BINARY_NAME}" 
+
+# -----------------------------------------------
+# Arguments 
+
+ARG SUPERVISORD_URL="supervisord:port/RPC2" \
+		WEB_LISTEN_ADDRESS="8080" \
+		WEB_TELEMETRY_PATH="/metrics"
+
+# -----------------------------------------------
+# Dynamic configuration
+
+ENV SUPERVISORD_URL=${SUPERVISORD_URL} \
+		WEB_LISTEN_ADDRESS=${WEB_LISTEN_ADDRESS} \
+		WEB_TELEMETRY_PATH=${WEB_TELEMETRY_PATH}
+
+# -----------------------------------------------
+# Expose ports
+
+EXPOSE ${WEB_LISTEN_ADDRESS}
+
+# -----------------------------------------------
+
+# Add FS overlay
+COPY overlay /
+RUN chmod +x /entrypoint.sh
+
+# Execute 
+SHELL ["/usr/bin/bash"]
+CMD ["/entrypoint.sh"]

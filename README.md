@@ -1,6 +1,6 @@
 # Supervisord Exporter - Docker Image
 
-The **Supervisor Exporter** is a Go application designed to collect process status information from the Supervisor process control system and expose it as Prometheus metrics. This allows you to monitor the state of processes managed by Supervisor.
+The **Supervisor Exporter** is a Go application designed to collect process status information from the Supervisor process control system and expose it as Prometheus metrics.
 
 All credit goes to the original creator of [Supervisord Exporter](https://github.com/salimd/supervisord_exporter) - [salmid](https://github.com/salimd). I'm here only to dockerized it :)
 

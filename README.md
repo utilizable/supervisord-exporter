@@ -1,13 +1,28 @@
-# Helm Chart Configuration
+# Supervisord Exporter - Docker Image
 
-This Helm Chart allows for the configuration of PipeWire and WirePlumber through environment variables. Below is a table describing the key configuration options and their default values.
+The **Supervisor Exporter** is a Go application designed to collect process status information from the Supervisor process control system and expose it as Prometheus metrics. This allows you to monitor the state of processes managed by Supervisor.
 
-| Variable Name           | Default Value  | Description                                                                 |
-|-------------------------|----------------|-----------------------------------------------------------------------------|
-| `PIPEWIRE_PORT`          | `4713`         | Specifies the port number used by PipeWire for audio streaming.             |
-| `PIPEWIRE_DEBUG`         | `E`            | Sets the debug level for PipeWire. Higher levels provide more detailed logs. |
-| `WIREPLUMBER_DEBUG`      | `E`            | Sets the debug level for WirePlumber, providing enhanced logging information.|
-| `PIPEWIRE_LATENCY`       | `32/48000`     | Configures audio latency as a fraction. The value is interpreted as `frames/sample rate`. |
-| `PIPEWIRE_QUANTUM`       | `1024/48000`   | Configures both the audio buffer size (`quantum`) and sample rate, affecting latency and performance. |
+All credit goes to the original creator of [Supervisord Exporter](https://github.com/salimd/supervisord_exporter) - [salmid](https://github.com/salimd). I'm here only to dockerized it :)
 
-These values can be customized as per your system requirements by modifying the Helm Chart values.
+## Usage
+
+Self Explanatory docker-compose example.
+
+```yaml
+version: "3"
+services:
+  supervisord:
+    image: supervisord:latest
+    ports:
+      - "9001:9001"
+    volumes:
+      - ./supervisord.conf:/etc/supervisord.conf
+  supervisord_exporter:
+    image: yourdockerimage/supervisord-exporter:latest
+    ports:
+      - "8080:8080"
+    environment:
+      SUPERVISORD_URL: "http://supervisord:9001/RPC2"
+      WEB_LISTEN_ADDRESS: "8080"
+      WEB_TELEMETRY_PATH: "/metrics"
+```
